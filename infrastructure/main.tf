@@ -4,6 +4,9 @@ locals {
       type      = "controlplane"
       node_name = "proxmox"
       memory = 4096
+      talos_config = {
+        version = "v1.12.0"
+      }
       network = {
         network_interface = "vmbrLAN"
         vlan_id           = 40
@@ -20,6 +23,9 @@ locals {
       type      = "controlplane"
       node_name = "proxmox"
       memory = 4096
+      talos_config = {
+        version = "v1.12.0"
+      }
       network = {
         network_interface = "vmbrLAN"
         vlan_id           = 40
@@ -36,6 +42,9 @@ locals {
       type      = "controlplane"
       node_name = "proxmox"
       memory = 4096
+      talos_config = {
+        version = "v1.12.0"
+      }
       network = {
         network_interface = "vmbrLAN"
         vlan_id           = 40
@@ -52,6 +61,10 @@ locals {
       type      = "worker"
       node_name = "proxmox"
       memory = 4096
+      rollout_generation = 1
+      talos_config = {
+        version = "v1.12.6"
+      }
       network = {
         network_interface = "vmbrLAN"
         vlan_id           = 40
@@ -68,6 +81,9 @@ locals {
       type      = "worker"
       node_name = "proxmox"
       memory = 4096
+      talos_config = {
+        version = "v1.12.0"
+      }
       network = {
         network_interface = "vmbrLAN"
         vlan_id           = 40
@@ -84,6 +100,9 @@ locals {
       type      = "worker"
       node_name = "proxmox"
       memory = 4096
+      talos_config = {
+        version = "v1.12.0"
+      }
       network = {
         network_interface = "vmbrLAN"
         vlan_id           = 40
@@ -111,5 +130,11 @@ module "kubernetes" {
 output "kubeconfig" {
   description = "Rendered kubeconfig for the Kubernetes cluster"
   value       = module.kubernetes.talos_kubeconfig
+  sensitive   = true
+}
+
+output "talosconfig" {
+  description = "Rendered talosconfig for the Talos cluster"
+  value       = module.kubernetes.talosconfig
   sensitive   = true
 }

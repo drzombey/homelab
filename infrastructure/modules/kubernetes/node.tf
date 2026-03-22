@@ -4,6 +4,7 @@ locals {
     cpu       = 2
     memory    = 2048
     disk_size = 20
+    rollout_generation = 0
     network = {
       network_interface = "vmbr0"
       vlan_id           = 0
@@ -22,6 +23,7 @@ locals {
         "qemu-guest-agent",
       ]
       endpoint       = null
+      version        = var.talos_version
       config_patches = []
     }
     additional_config = {
@@ -39,6 +41,7 @@ locals {
       cpu       = coalesce(try(node.cpu, null), local.kube_node_defaults.cpu)
       memory    = coalesce(try(node.memory, null), local.kube_node_defaults.memory)
       disk_size = coalesce(try(node.disk_size, null), local.kube_node_defaults.disk_size)
+      rollout_generation = coalesce(try(node.rollout_generation, null), local.kube_node_defaults.rollout_generation)
       network = {
         network_interface = coalesce(
           try(node.network.network_interface, null),
@@ -66,6 +69,10 @@ locals {
           local.kube_node_defaults.talos_config.official_system_extensions
         )
         endpoint = try(node.talos_config.endpoint, local.kube_node_defaults.talos_config.endpoint)
+        version = coalesce(
+          try(node.talos_config.version, null),
+          local.kube_node_defaults.talos_config.version
+        )
         config_patches = coalesce(
           try(node.talos_config.config_patches, null),
           local.kube_node_defaults.talos_config.config_patches
@@ -90,7 +97,12 @@ locals {
 
   talos_image_targets = {
     for name, node in local.kube_nodes :
-    name => format("%s::%s", node.node_name, node.additional_config.image_datastore)
+    name => format(
+      "%s::%s::%s",
+      node.node_name,
+      node.additional_config.image_datastore,
+      node.rollout_generation > 0 ? node.talos_config.version : "legacy"
+    )
   }
 
   talos_image_download_keys = distinct(values(local.talos_image_targets))
@@ -100,6 +112,8 @@ locals {
     sort([for name, key in local.talos_image_targets : name if key == target_key])[0] => {
       node_name       = split("::", target_key)[0]
       image_datastore = split("::", target_key)[1]
+      image_key       = split("::", target_key)[2]
+      talos_version   = split("::", target_key)[2] == "legacy" ? var.talos_version : split("::", target_key)[2]
       target_key      = target_key
     }
   }
@@ -122,6 +136,9 @@ resource "proxmox_virtual_environment_vm" "main" {
   lifecycle {
     ignore_changes = [
       initialization,
+    ]
+    replace_triggered_by = [
+      terraform_data.node_rollout[each.key],
     ]
   }
   
@@ -151,7 +168,7 @@ resource "proxmox_virtual_environment_vm" "main" {
   }
 
   agent {
-    enabled = true
+    enabled = false
   }
 
   initialization {
@@ -183,13 +200,22 @@ resource "proxmox_virtual_environment_vm" "main" {
   }
 }
 
+resource "terraform_data" "node_rollout" {
+  for_each = local.kube_nodes
+
+  input = {
+    talos_version       = each.value.talos_config.version
+    rollout_generation  = each.value.rollout_generation
+  }
+}
+
 resource "proxmox_virtual_environment_download_file" "talos_image" {
   for_each           = local.talos_image_downloads
   content_type       = "iso"
   datastore_id       = each.value.image_datastore
-  file_name          = "talos-nocloud-amd64.iso"
+  file_name          = each.value.image_key == "legacy" ? "talos-nocloud-amd64.iso" : format("talos-%s-nocloud-amd64.iso", replace(each.value.talos_version, "v", ""))
   node_name          = each.value.node_name
   overwrite          = false
   overwrite_unmanaged = false
-  url                = format("https://factory.talos.dev/image/%s/%s/nocloud-amd64.iso", talos_image_factory_schematic.this.id, data.talos_image_factory_extensions_versions.this.talos_version)
+  url                = format("https://factory.talos.dev/image/%s/%s/nocloud-amd64.iso", talos_image_factory_schematic.this.id, each.value.talos_version)
 }

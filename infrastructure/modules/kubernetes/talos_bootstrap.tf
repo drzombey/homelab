@@ -23,30 +23,25 @@ locals {
 
   talos_machine_network_patches = {
     for name, node in local.kube_nodes :
-    name => join("\n", concat(
-      [
-        "machine:",
-        "  network:",
-      ],
-      length(node.network.dns_server) > 0 ? concat(
-        ["    nameservers:"],
-        [for server in node.network.dns_server : format("      - %s", server)]
-      ) : [],
-      [
-        "    interfaces:",
-        "      - deviceSelector:",
-        format("          hardwareAddr: %s", lower(proxmox_virtual_environment_vm.main[name].network_device[0].mac_address)),
-        format("        dhcp: %s", node.network.ipv4.address == "dhcp" ? "true" : "false"),
-      ],
-      node.network.ipv4.address == "dhcp" ? [] : [
-        "        addresses:",
-        format("          - %s", node.network.ipv4.address),
-        "        routes:",
-        "          - network: 0.0.0.0/0",
-        format("            gateway: %s", node.network.ipv4.gateway),
-      ]
-    ))
+    name => templatefile("${path.module}/templates/talos-network-patch.yaml.tftpl", {
+      dns_servers   = length(node.network.dns_server) > 0 ? node.network.dns_server : var.talos_base_config.nameservers
+      hardware_addr = lower(proxmox_virtual_environment_vm.main[name].network_device[0].mac_address)
+      dhcp          = node.network.ipv4.address == "dhcp"
+      address       = node.network.ipv4.address
+      gateway       = node.network.ipv4.gateway
+    })
   }
+
+  talos_base_patch = templatefile("${path.module}/templates/talos-base-patch.yaml.tftpl", {
+    extra_kernel_args = var.talos_base_config.extra_kernel_args
+    nameservers       = []
+    ntp_servers       = var.talos_base_config.ntp_servers
+    sysctls           = var.talos_base_config.sysctls
+    node_labels       = var.talos_base_config.node_labels
+    node_taints       = var.talos_base_config.node_taints
+    registry_mirrors  = var.talos_base_config.registries.mirrors
+    registry_configs  = var.talos_base_config.registries.config
+  })
 }
 
 resource "talos_machine_secrets" "this" {
@@ -80,12 +75,9 @@ resource "talos_machine_configuration_apply" "controlplane" {
   machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
   config_patches = concat(
     [
-      yamlencode({
-        machine = {
-          install = {
-            disk = var.talos_install_disk
-          }
-        }
+      local.talos_base_patch,
+      templatefile("${path.module}/templates/talos-install-patch.yaml.tftpl", {
+        install_disk = var.talos_install_disk
       }),
       local.talos_machine_network_patches[each.key]
     ],
@@ -106,12 +98,9 @@ resource "talos_machine_configuration_apply" "worker" {
   machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration
   config_patches = concat(
     [
-      yamlencode({
-        machine = {
-          install = {
-            disk = var.talos_install_disk
-          }
-        }
+      local.talos_base_patch,
+      templatefile("${path.module}/templates/talos-install-patch.yaml.tftpl", {
+        install_disk = var.talos_install_disk
       }),
       local.talos_machine_network_patches[each.key]
     ],
@@ -159,4 +148,29 @@ output "talos_kubeconfig" {
   description = "Rendered kubeconfig for the Talos Kubernetes cluster"
   value       = talos_cluster_kubeconfig.this.kubeconfig_raw
   sensitive   = true
+}
+
+output "talosconfig" {
+  description = "Rendered talosconfig for the Talos cluster"
+  value = yamlencode({
+    context = var.talos_cluster_name
+    contexts = {
+      (var.talos_cluster_name) = {
+        endpoints = [for name in sort(keys(local.controlplane_nodes)) : local.talos_node_endpoints[name]]
+        nodes     = [for name in sort(keys(local.kube_nodes)) : local.talos_node_endpoints[name]]
+      }
+    }
+    clusters = {
+      (var.talos_cluster_name) = {
+        ca = talos_machine_secrets.this.client_configuration.ca_certificate
+      }
+    }
+    auth = {
+      (var.talos_cluster_name) = {
+        client-certificate = talos_machine_secrets.this.client_configuration.client_certificate
+        client-key         = talos_machine_secrets.this.client_configuration.client_key
+      }
+    }
+  })
+  sensitive = true
 }

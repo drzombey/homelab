@@ -7,6 +7,7 @@ variable "kube_nodes" {
       cpu               = optional(number)
       memory            = optional(number)
       disk_size         = optional(number)
+      rollout_generation = optional(number)
       network = optional(object({
         network_interface  = optional(string)
         vlan_id            = optional(number)
@@ -19,6 +20,7 @@ variable "kube_nodes" {
       talos_config = optional(object({
         official_system_extensions = optional(list(string))
         endpoint                   = optional(string)
+        version                    = optional(string)
         config_patches             = optional(list(string))
       }))
       additional_config = optional(object({
@@ -126,4 +128,44 @@ variable "kubernetes_version" {
   type        = string
   default     = null
   nullable    = true
+}
+
+variable "talos_base_config" {
+  description = "Optional shared Talos base settings rendered into a common config patch"
+  type = object({
+    extra_kernel_args = optional(list(string))
+    nameservers       = optional(list(string))
+    ntp_servers       = optional(list(string))
+    sysctls           = optional(map(string))
+    node_labels       = optional(map(string))
+    node_taints       = optional(list(string))
+    registries = optional(object({
+      mirrors = optional(map(object({
+        endpoints = list(string)
+      })))
+      config = optional(map(object({
+        tls = optional(object({
+          insecure_skip_verify = optional(bool)
+        }))
+        auth = optional(object({
+          username = optional(string)
+          password = optional(string)
+          auth     = optional(string)
+          identity_token = optional(string)
+        }))
+      })))
+    }))
+  })
+  default = {
+    extra_kernel_args = []
+    nameservers       = []
+    ntp_servers       = []
+    sysctls           = {}
+    node_labels       = {}
+    node_taints       = []
+    registries = {
+      mirrors = {}
+      config  = {}
+    }
+  }
 }

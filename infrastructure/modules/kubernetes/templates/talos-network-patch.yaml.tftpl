@@ -1,0 +1,19 @@
+machine:
+  network:
+%{ if length(dns_servers) > 0 ~}
+    nameservers:
+%{ for server in dns_servers ~}
+      - ${server}
+%{ endfor ~}
+%{ endif ~}
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: ${hardware_addr}
+        dhcp: ${dhcp}
+%{ if !dhcp ~}
+        addresses:
+          - ${address}
+        routes:
+          - network: 0.0.0.0/0
+            gateway: ${gateway}
+%{ endif ~}

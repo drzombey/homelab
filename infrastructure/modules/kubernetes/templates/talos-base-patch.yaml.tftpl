@@ -1,0 +1,78 @@
+machine:
+%{ if length(extra_kernel_args) > 0 ~}
+  install:
+    extraKernelArgs:
+%{ for arg in extra_kernel_args ~}
+      - ${arg}
+%{ endfor ~}
+%{ endif ~}
+%{ if length(nameservers) > 0 ~}
+  network:
+    nameservers:
+%{ for server in nameservers ~}
+      - ${server}
+%{ endfor ~}
+%{ endif ~}
+%{ if length(ntp_servers) > 0 ~}
+  time:
+    servers:
+%{ for server in ntp_servers ~}
+      - ${server}
+%{ endfor ~}
+%{ endif ~}
+%{ if length(sysctls) > 0 ~}
+  sysctls:
+%{ for key, value in sysctls ~}
+    ${key}: ${yamlencode(value)}
+%{ endfor ~}
+%{ endif ~}
+%{ if length(node_labels) > 0 || length(node_taints) > 0 ~}
+  nodeLabels:
+%{ for key, value in node_labels ~}
+    ${key}: ${yamlencode(value)}
+%{ endfor ~}
+%{ for taint in node_taints ~}
+    node-role.kubernetes.io/${replace(taint, ":", "-")}: ${yamlencode(taint)}
+%{ endfor ~}
+%{ endif ~}
+%{ if length(registry_mirrors) > 0 || length(registry_configs) > 0 ~}
+machine:
+  registries:
+%{ if length(registry_mirrors) > 0 ~}
+    mirrors:
+%{ for name, mirror in registry_mirrors ~}
+      ${name}:
+        endpoints:
+%{ for endpoint in mirror.endpoints ~}
+          - ${endpoint}
+%{ endfor ~}
+%{ endfor ~}
+%{ endif ~}
+%{ if length(registry_configs) > 0 ~}
+    config:
+%{ for name, cfg in registry_configs ~}
+      ${name}:
+%{ if cfg.tls != null ~}
+        tls:
+%{ if cfg.tls.insecure_skip_verify != null ~}
+          insecureSkipVerify: ${cfg.tls.insecure_skip_verify}
+%{ endif ~}
+%{ endif ~}
+%{ if cfg.auth != null ~}
+        auth:
+%{ if cfg.auth.username != null ~}
+          username: ${cfg.auth.username}
+%{ endif ~}
+%{ if cfg.auth.password != null ~}
+          password: ${cfg.auth.password}
+%{ endif ~}
+%{ if cfg.auth.auth != null ~}
+          auth: ${cfg.auth.auth}
+%{ endif ~}
+%{ if cfg.auth.identity_token != null ~}
+          identityToken: ${cfg.auth.identity_token}
+%{ endif ~}
+%{ endif ~}
+%{ endfor ~}
+%{ endif ~}
+%{ endif ~}
