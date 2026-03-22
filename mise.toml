@@ -1,2 +1,3 @@
 [tools]
 opentofu = "latest"
+talosctl = "latest"
