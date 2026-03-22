@@ -32,6 +32,16 @@ locals {
     })
   }
 
+  talos_hostname_patches = {
+    for name, node in local.kube_nodes :
+    name => yamlencode({
+      apiVersion = "v1alpha1"
+      kind       = "HostnameConfig"
+      hostname   = name
+      auto       = "off"
+    })
+  }
+
   talos_base_patch = templatefile("${path.module}/templates/talos-base-patch.yaml.tftpl", {
     extra_kernel_args = var.talos_base_config.extra_kernel_args
     nameservers       = []
@@ -42,6 +52,11 @@ locals {
     registry_mirrors  = var.talos_base_config.registries.mirrors
     registry_configs  = var.talos_base_config.registries.config
   })
+
+  talos_installer_images = {
+    for name, node in local.kube_nodes :
+    name => format("factory.talos.dev/installer/%s:%s", talos_image_factory_schematic.this.id, node.talos_config.version)
+  }
 }
 
 resource "talos_machine_secrets" "this" {
@@ -77,8 +92,10 @@ resource "talos_machine_configuration_apply" "controlplane" {
     [
       local.talos_base_patch,
       templatefile("${path.module}/templates/talos-install-patch.yaml.tftpl", {
-        install_disk = var.talos_install_disk
+        install_disk  = var.talos_install_disk
+        install_image = local.talos_installer_images[each.key]
       }),
+      local.talos_hostname_patches[each.key],
       local.talos_machine_network_patches[each.key]
     ],
     each.value.talos_config.config_patches
@@ -100,8 +117,10 @@ resource "talos_machine_configuration_apply" "worker" {
     [
       local.talos_base_patch,
       templatefile("${path.module}/templates/talos-install-patch.yaml.tftpl", {
-        install_disk = var.talos_install_disk
+        install_disk  = var.talos_install_disk
+        install_image = local.talos_installer_images[each.key]
       }),
+      local.talos_hostname_patches[each.key],
       local.talos_machine_network_patches[each.key]
     ],
     each.value.talos_config.config_patches

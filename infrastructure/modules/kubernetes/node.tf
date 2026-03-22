@@ -168,7 +168,12 @@ resource "proxmox_virtual_environment_vm" "main" {
   }
 
   agent {
-    enabled = false
+    enabled = true
+
+    wait_for_ip {
+      ipv4 = false
+      ipv6 = false
+    }
   }
 
   initialization {
