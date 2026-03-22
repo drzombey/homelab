@@ -1,0 +1,2 @@
+proxmox_host_endpoint = "https://proxmox.example.net:8006/api2/json"
+proxmox_api_token     = "root@pam!terraform=replace-me"

@@ -1,0 +1,45 @@
+# Troubleshooting
+
+## Slow `tofu plan`
+
+Possible causes:
+
+- Proxmox VM refresh is slow
+- many VM resources are being refreshed
+
+Useful check:
+
+```bash
+tofu plan -refresh=false
+```
+
+## Talos Node Got DHCP Instead Of Static IP
+
+Check:
+
+- `talos_config.endpoint`
+- network patch template rendering
+- whether the NIC MAC changed after node replacement
+
+## Apply Fails With `ide2` Hotplug Or Media Type Error
+
+This repo mitigates that by ignoring later Proxmox `initialization` changes on existing VMs.
+
+## Talos Config Apply Fails With Hostname Conflict
+
+Do not set a static hostname twice in Talos patches. The repo already avoids this in the shared network template.
+
+## Interrupted Apply Left A State Lock
+
+If no other OpenTofu process is still running:
+
+```bash
+tofu force-unlock <LOCK_ID>
+```
+
+## Practical Tips
+
+- keep `talos_config.endpoint` set explicitly when recovering a node whose IP changed unexpectedly
+- upgrade workers before controlplanes
+- keep controlplane upgrades strictly one-by-one
+- export `kubeconfig` and `talosconfig` after bootstrap for daily operations
