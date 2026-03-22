@@ -56,3 +56,83 @@ After bootstrap, export configs with:
 tofu output -raw kubeconfig > kubeconfig
 tofu output -raw talosconfig > talosconfig
 ```
+
+## Install `kubeconfig` And `talosconfig`
+
+Recommended standard locations:
+
+- Kubernetes config: `~/.kube/config`
+- Talos config: `~/.talos/config`
+
+Create the directories if they do not exist:
+
+```bash
+mkdir -p ~/.kube ~/.talos
+```
+
+Write the configs to the standard locations:
+
+```bash
+tofu output -raw kubeconfig > ~/.kube/config
+tofu output -raw talosconfig > ~/.talos/config
+```
+
+Restrict permissions on the Talos config:
+
+```bash
+chmod 600 ~/.talos/config
+```
+
+## Load The Configs In Your Shell
+
+`kubectl` uses `~/.kube/config` automatically in most setups.
+
+For Talos, either use the default path `~/.talos/config` or export it explicitly:
+
+```bash
+export TALOSCONFIG=~/.talos/config
+```
+
+If you want that permanently in your shell profile:
+
+```bash
+echo 'export TALOSCONFIG=~/.talos/config' >> ~/.bashrc
+```
+
+For `zsh`:
+
+```bash
+echo 'export TALOSCONFIG=~/.talos/config' >> ~/.zshrc
+```
+
+Then reload your shell:
+
+```bash
+source ~/.bashrc
+```
+
+or:
+
+```bash
+source ~/.zshrc
+```
+
+## Verify Access
+
+Check Kubernetes access:
+
+```bash
+kubectl get nodes
+```
+
+Check Talos access:
+
+```bash
+talosctl -e 10.0.40.10 -n 10.0.40.10 version
+```
+
+Check the QEMU guest agent service on a node:
+
+```bash
+talosctl -e 10.0.40.10 -n 10.0.40.10 service ext-qemu-guest-agent
+```

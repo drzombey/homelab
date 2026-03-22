@@ -43,3 +43,15 @@ tofu force-unlock <LOCK_ID>
 - upgrade workers before controlplanes
 - keep controlplane upgrades strictly one-by-one
 - export `kubeconfig` and `talosconfig` after bootstrap for daily operations
+
+## `talosctl` Cannot Determine Endpoints
+
+If you see `failed to determine endpoints`, you likely set only `-n` and not `-e`.
+
+Use both:
+
+```bash
+talosctl -e 10.0.40.10 -n 10.0.40.10 version
+```
+
+Or make sure `TALOSCONFIG` points to `~/.talos/config`.

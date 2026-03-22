@@ -30,3 +30,5 @@ tofu apply
 tofu output -raw kubeconfig > kubeconfig
 tofu output -raw talosconfig > talosconfig
 ```
+
+For the standard install paths and shell setup, see `docs/setup.md`.
