@@ -1,4 +1,4 @@
-# Configuration
+# Infrastructure Configuration
 
 ## Node Model
 
@@ -45,7 +45,7 @@ node01 = {
 
 ## Defaults
 
-Important defaults from `modules/kubernetes/node.tf`:
+Important defaults from `infrastructure/modules/kubernetes/node.tf`:
 
 - `cpu = 2`
 - `memory = 2048`
@@ -71,9 +71,9 @@ Talos configuration is assembled from:
 
 Template files:
 
-- `modules/kubernetes/templates/talos-base-patch.yaml.tftpl`
-- `modules/kubernetes/templates/talos-install-patch.yaml.tftpl`
-- `modules/kubernetes/templates/talos-network-patch.yaml.tftpl`
+- `infrastructure/modules/kubernetes/templates/talos-base-patch.yaml.tftpl`
+- `infrastructure/modules/kubernetes/templates/talos-install-patch.yaml.tftpl`
+- `infrastructure/modules/kubernetes/templates/talos-network-patch.yaml.tftpl`
 
 ## Shared Talos Base Settings
 

@@ -1,4 +1,4 @@
-# Upgrades
+# Infrastructure Upgrades
 
 ## Current Upgrade Model
 

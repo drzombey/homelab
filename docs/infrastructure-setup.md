@@ -1,4 +1,4 @@
-# Setup
+# Infrastructure Setup
 
 ## Requirements
 
@@ -10,18 +10,18 @@
 
 ## Root Variables
 
-Root variables are defined in `variables.tf`:
+Root variables are defined in `infrastructure/variables.tf`:
 
 - `proxmox_host_endpoint`
 - `proxmox_api_token`
 
-Use `terraform.tfvars.example` as a starting point.
+Use `infrastructure/terraform.tfvars.example` as a starting point.
 
 ## Initial Cluster Setup
 
 Recommended first-time workflow:
 
-1. copy `terraform.tfvars.example` to `terraform.tfvars`
+1. copy `infrastructure/terraform.tfvars.example` to your own `infrastructure/terraform.tfvars`
 2. adjust `main.tf` and define your nodes in `local.nodes`
 3. run `tofu init`
 4. run `tofu validate`

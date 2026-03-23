@@ -1,4 +1,4 @@
-# Overview
+# Infrastructure Overview
 
 ## Purpose
 
@@ -21,12 +21,12 @@ This repo provisions Talos-based Kubernetes nodes on Proxmox and bootstraps the 
 
 - `main.tf` root node inventory, module call, and outputs
 - `variables.tf` root credentials variables
-- `modules/kubernetes/main.tf` provider configuration
-- `modules/kubernetes/variables.tf` module input schema and validations
-- `modules/kubernetes/node.tf` VM creation, ISO download, rollout logic
-- `modules/kubernetes/talos_schema.tf` Talos image factory setup
-- `modules/kubernetes/talos_bootstrap.tf` config apply, bootstrap, kubeconfig, health
-- `modules/kubernetes/templates/` Talos patch templates
+- `infrastructure/modules/kubernetes/main.tf` provider configuration
+- `infrastructure/modules/kubernetes/variables.tf` module input schema and validations
+- `infrastructure/modules/kubernetes/node.tf` VM creation, ISO download, rollout logic
+- `infrastructure/modules/kubernetes/talos_schema.tf` Talos image factory setup
+- `infrastructure/modules/kubernetes/talos_bootstrap.tf` config apply, bootstrap, kubeconfig, health
+- `infrastructure/modules/kubernetes/templates/` Talos patch templates
 
 ## Important Runtime Behavior
 
