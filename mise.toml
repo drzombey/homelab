@@ -1,3 +1,4 @@
 [tools]
+helm = "latest"
 opentofu = "latest"
 talosctl = "latest"
