@@ -35,6 +35,17 @@ machine:
     node-role.kubernetes.io/${replace(taint, ":", "-")}: ${yamlencode(taint)}
 %{ endfor ~}
 %{ endif ~}
+%{ if kube_proxy_mode != null || kube_proxy_ipvs_strict_arp != null ~}
+cluster:
+  proxy:
+%{ if kube_proxy_mode != null ~}
+    mode: ${kube_proxy_mode}
+%{ endif ~}
+%{ if kube_proxy_ipvs_strict_arp != null ~}
+    extraArgs:
+      ipvs-strict-arp: ${yamlencode(tostring(kube_proxy_ipvs_strict_arp))}
+%{ endif ~}
+%{ endif ~}
 %{ if length(registry_mirrors) > 0 || length(registry_configs) > 0 ~}
 machine:
   registries:

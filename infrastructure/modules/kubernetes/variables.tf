@@ -139,6 +139,10 @@ variable "talos_base_config" {
     sysctls           = optional(map(string))
     node_labels       = optional(map(string))
     node_taints       = optional(list(string))
+    kube_proxy = optional(object({
+      mode             = optional(string)
+      ipvs_strict_arp  = optional(bool)
+    }))
     registries = optional(object({
       mirrors = optional(map(object({
         endpoints = list(string)
@@ -163,6 +167,10 @@ variable "talos_base_config" {
     sysctls           = {}
     node_labels       = {}
     node_taints       = []
+    kube_proxy = {
+      mode            = null
+      ipvs_strict_arp = null
+    }
     registries = {
       mirrors = {}
       config  = {}

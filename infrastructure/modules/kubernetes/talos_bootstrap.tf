@@ -43,14 +43,16 @@ locals {
   }
 
   talos_base_patch = templatefile("${path.module}/templates/talos-base-patch.yaml.tftpl", {
-    extra_kernel_args = var.talos_base_config.extra_kernel_args
+    extra_kernel_args = coalesce(try(var.talos_base_config.extra_kernel_args, null), [])
     nameservers       = []
-    ntp_servers       = var.talos_base_config.ntp_servers
-    sysctls           = var.talos_base_config.sysctls
-    node_labels       = var.talos_base_config.node_labels
-    node_taints       = var.talos_base_config.node_taints
-    registry_mirrors  = var.talos_base_config.registries.mirrors
-    registry_configs  = var.talos_base_config.registries.config
+    ntp_servers       = coalesce(try(var.talos_base_config.ntp_servers, null), [])
+    sysctls           = coalesce(try(var.talos_base_config.sysctls, null), {})
+    node_labels       = coalesce(try(var.talos_base_config.node_labels, null), {})
+    node_taints       = coalesce(try(var.talos_base_config.node_taints, null), [])
+    kube_proxy_mode   = try(var.talos_base_config.kube_proxy.mode, null)
+    kube_proxy_ipvs_strict_arp = try(var.talos_base_config.kube_proxy.ipvs_strict_arp, null)
+    registry_mirrors  = coalesce(try(var.talos_base_config.registries.mirrors, null), {})
+    registry_configs  = coalesce(try(var.talos_base_config.registries.config, null), {})
   })
 
   talos_installer_images = {

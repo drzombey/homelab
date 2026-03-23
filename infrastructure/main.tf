@@ -105,6 +105,12 @@ module "kubernetes" {
   proxmox_api_token = var.proxmox_api_token
   proxmox_host_endpoint = var.proxmox_host_endpoint
   proxmox_insecure = true
+  talos_base_config = {
+    kube_proxy = {
+      mode            = "ipvs"
+      ipvs_strict_arp = true
+    }
+  }
 }
 
 output "kubeconfig" {
