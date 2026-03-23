@@ -5,7 +5,7 @@ locals {
       node_name = "proxmox"
       memory = 4096
       talos_config = {
-        version = "v1.12.0"
+        version = "v1.12.6"
       }
       network = {
         network_interface = "vmbrLAN"
@@ -24,7 +24,7 @@ locals {
       node_name = "proxmox"
       memory = 4096
       talos_config = {
-        version = "v1.12.0"
+        version = "v1.12.6"
       }
       network = {
         network_interface = "vmbrLAN"
@@ -39,11 +39,11 @@ locals {
       }
     }
     "node03" = {
-      type      = "controlplane"
+      type      = "worker"
       node_name = "proxmox"
       memory = 4096
       talos_config = {
-        version = "v1.12.0"
+        version = "v1.12.6"
       }
       network = {
         network_interface = "vmbrLAN"
@@ -61,7 +61,6 @@ locals {
       type      = "worker"
       node_name = "proxmox"
       memory = 4096
-      rollout_generation = 1
       talos_config = {
         version = "v1.12.6"
       }
@@ -82,7 +81,7 @@ locals {
       node_name = "proxmox"
       memory = 4096
       talos_config = {
-        version = "v1.12.0"
+        version = "v1.12.6"
       }
       network = {
         network_interface = "vmbrLAN"
@@ -92,25 +91,6 @@ locals {
         ]
         ipv4 = {
           address = "10.0.40.14/24"
-          gateway = "10.0.40.1"
-        }
-      }
-    }
-    "node06" = {
-      type      = "worker"
-      node_name = "proxmox"
-      memory = 4096
-      talos_config = {
-        version = "v1.12.0"
-      }
-      network = {
-        network_interface = "vmbrLAN"
-        vlan_id           = 40
-        dns_server = [
-          "10.0.40.1"
-        ]
-        ipv4 = {
-          address = "10.0.40.15/24"
           gateway = "10.0.40.1"
         }
       }
