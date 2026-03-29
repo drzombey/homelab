@@ -8,22 +8,6 @@ variable "proxmox_api_token" {
   type        = string
 }
 
-variable "github_app_id" {
-  description = "GitHub App ID für Flux bootstrap"
-  type        = number
-}
-
-variable "github_app_installation_id" {
-  description = "GitHub App Installation ID (unter Settings → Developer settings → GitHub Apps → deine App → Install)"
-  type        = number
-}
-
-variable "github_app_private_key" {
-  description = "Inhalt des privaten Schlüssels der GitHub App (PEM-Format)"
-  type        = string
-  sensitive   = true
-}
-
 variable "github_owner" {
   description = "GitHub owner (user oder organisation) für das homelab Repository"
   type        = string

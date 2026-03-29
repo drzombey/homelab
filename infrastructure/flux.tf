@@ -1,7 +1,7 @@
 # Flux bootstrap via local-exec
-# Verwendet eine GitHub App für Authentifizierung — kein PAT wird benötigt.
-# Der private Schlüssel der App wird nur einmalig in eine temporäre Datei geschrieben
-# und nach dem Bootstrap sofort gelöscht.
+# Verwendet den Token der lokal eingeloggten gh CLI — kein separates Secret nötig.
+# Nach dem Bootstrap verwendet Flux den angelegten SSH Deploy Key für
+# alle weiteren Git-Operationen. Der Token verbleibt nicht im Cluster.
 resource "terraform_data" "flux_bootstrap" {
   triggers_replace = {
     owner = var.github_owner
@@ -12,26 +12,21 @@ resource "terraform_data" "flux_bootstrap" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     environment = {
-      KUBECONFIG_CONTENT     = module.kubernetes.talos_kubeconfig
-      GITHUB_APP_PRIVATE_KEY = var.github_app_private_key
+      KUBECONFIG_CONTENT = module.kubernetes.talos_kubeconfig
     }
     command = <<-BASH
       set -euo pipefail
       TMPKUBE=$(mktemp)
-      TMPKEY=$(mktemp)
-      trap "rm -f $TMPKUBE $TMPKEY" EXIT
+      trap "rm -f $TMPKUBE" EXIT
       printf '%s' "$KUBECONFIG_CONTENT" > "$TMPKUBE"
       chmod 600 "$TMPKUBE"
-      printf '%s' "$GITHUB_APP_PRIVATE_KEY" > "$TMPKEY"
-      chmod 600 "$TMPKEY"
-      KUBECONFIG="$TMPKUBE" flux bootstrap github \
+
+      KUBECONFIG="$TMPKUBE" GITHUB_TOKEN="$(gh auth token)" flux bootstrap github \
         --owner="${var.github_owner}" \
         --repository="${var.github_repository}" \
         --branch=main \
         --path=clusters/homelab \
-        --app-id="${var.github_app_id}" \
-        --app-installation-id="${var.github_app_installation_id}" \
-        --app-private-key="$TMPKEY"
+        --personal
     BASH
   }
 

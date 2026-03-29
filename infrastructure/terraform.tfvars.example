@@ -1,11 +1,8 @@
 proxmox_host_endpoint = "https://proxmox.example.net:8006/api2/json"
 proxmox_api_token     = "root@pam!terraform=replace-me"
 
-github_app_id              = 123456
-github_app_installation_id = 78901234
-github_app_private_key     = "-----BEGIN RSA PRIVATE KEY-----\nreplace-me\n-----END RSA PRIVATE KEY-----"
-github_owner               = "drzombey"
-github_repository          = "homelab"
+github_owner      = "drzombey"
+github_repository = "homelab"
 
 op_connect_token    = "replace-me"
 op_credentials_json = "{\"your\": \"1password-credentials.json content here\"}"

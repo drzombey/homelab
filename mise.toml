@@ -1,6 +1,6 @@
 [tools]
 flux2 = "latest"
-helm     = "latest"
+helm = "latest"
 k9s = "latest"
 opentofu = "latest"
 talosctl = "latest"

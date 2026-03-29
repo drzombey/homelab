@@ -8,6 +8,7 @@ This repository contains the infrastructure and cluster configuration for my hom
 | --- | --- |
 | `infrastructure/` | OpenTofu code to provision Talos-based Kubernetes nodes on Proxmox |
 | `cluster-infrastructure/` | Post-bootstrap cluster configuration such as MetalLB BGP resources |
+| `clusters/` | Flux GitOps configuration for the Kubernetes cluster |
 
 ## Documentation
 
@@ -27,6 +28,13 @@ All repository documentation lives under `docs/`.
 - [Cluster Infrastructure](docs/cluster-infrastructure.md) overview of post-bootstrap cluster configuration
 - [MetalLB BGP](docs/metallb-bgp.md) MetalLB FRR mode with OPNsense BGP peering
 
+### Flux GitOps
+
+- [Flux Overview](docs/flux-overview.md) architecture, component list, repo layout, and dependency graph
+- [Flux Setup](docs/flux-setup.md) prerequisites, variables, and bootstrap workflow
+- [Flux Operations](docs/flux-operations.md) day-2 operations: adding components, reconciling, upgrading
+- [Flux Troubleshooting](docs/flux-troubleshooting.md) common issues and fixes
+
 ## Network Summary
 
 | Network | Purpose | Notes |
@@ -39,7 +47,7 @@ All repository documentation lives under `docs/`.
 
 1. Provision Talos nodes with the code in `infrastructure/`
 2. Export `kubeconfig` and `talosconfig`
-3. Apply cluster-level add-ons from `cluster-infrastructure/`
+3. Flux bootstraps automatically via OpenTofu and begins reconciling `clusters/homelab/`
 4. Verify networking, BGP, and workload reachability
 
 ## Quick Start
