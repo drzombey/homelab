@@ -5,12 +5,12 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./clusters/homelab/infrastructure/kubelet-serving-cert-approver
+  path: ./deploy/standalone
   prune: true
   wait: true
   timeout: 5m
   sourceRef:
     kind: GitRepository
-    name: flux-system
+    name: kubelet-serving-cert-approver
   dependsOn:
     - name: sources

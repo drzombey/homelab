@@ -1,8 +1,10 @@
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+kind: GitRepository
 metadata:
   name: kubelet-serving-cert-approver
   namespace: flux-system
 spec:
   interval: 24h
-  url: https://alex1989hu.github.io/kubelet-serving-cert-approver
+  url: https://github.com/alex1989hu/kubelet-serving-cert-approver
+  ref:
+    tag: v0.10.3
