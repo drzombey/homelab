@@ -11,3 +11,4 @@ resources:
   - kubelet-serving-cert-approver.yaml
   - metrics-server.yaml
   - external-dns.yaml
+  - traefik.yaml
