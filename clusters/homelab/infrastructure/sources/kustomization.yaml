@@ -7,3 +7,4 @@ resources:
   - 1password.yaml
   - metrics-server.yaml
   - kubelet-serving-cert-approver.yaml
+  - external-dns.yaml

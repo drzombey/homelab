@@ -10,3 +10,4 @@ resources:
   - cluster-secret-store.yaml
   - kubelet-serving-cert-approver.yaml
   - metrics-server.yaml
+  - external-dns.yaml
