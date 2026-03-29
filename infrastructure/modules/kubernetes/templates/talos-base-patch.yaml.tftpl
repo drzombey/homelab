@@ -35,6 +35,13 @@ machine:
     node-role.kubernetes.io/${replace(taint, ":", "-")}: ${yamlencode(taint)}
 %{ endfor ~}
 %{ endif ~}
+%{ if length(kubelet_extra_args) > 0 ~}
+  kubelet:
+    extraArgs:
+%{ for key, value in kubelet_extra_args ~}
+      ${key}: ${yamlencode(value)}
+%{ endfor ~}
+%{ endif ~}
 %{ if kube_proxy_mode != null || kube_proxy_ipvs_strict_arp != null ~}
 cluster:
   proxy:

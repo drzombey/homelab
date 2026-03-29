@@ -8,4 +8,5 @@ resources:
   - external-secrets.yaml
   - 1password-connect.yaml
   - cluster-secret-store.yaml
+  - kubelet-serving-cert-approver.yaml
   - metrics-server.yaml

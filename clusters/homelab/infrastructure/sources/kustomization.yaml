@@ -6,3 +6,4 @@ resources:
   - external-secrets.yaml
   - 1password.yaml
   - metrics-server.yaml
+  - kubelet-serving-cert-approver.yaml
