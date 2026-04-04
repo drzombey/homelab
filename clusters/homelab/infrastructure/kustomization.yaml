@@ -13,3 +13,4 @@ resources:
   - metrics-server.yaml
   - external-dns.yaml
   - networking.yaml
+  - tns-csi.yaml

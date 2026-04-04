@@ -4,8 +4,9 @@ data "talos_image_factory_extensions_versions" "this" {
     names = [
       "i915-ucode",       # see https://github.com/siderolabs/talos/issues/9776
       "intel-ucode",      # see https://github.com/siderolabs/talos/issues/9776
-      "iscsi-tools",      # for longhorn
+      "iscsi-tools",      # for block storage (tns-csi)
       "mei",              # see https://github.com/siderolabs/talos/issues/9776
+      "nfs-common",       # for NFS storage (tns-csi)
       "qemu-guest-agent", # for proxmox
     ]
   }

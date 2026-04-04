@@ -1,0 +1,94 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tns-csi
+  namespace: kube-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: tns-csi-driver
+      version: "0.17.4"
+      sourceRef:
+        kind: HelmRepository
+        name: tns-csi
+        namespace: flux-system
+      interval: 12h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    truenas:
+      existingSecret: tns-csi-credentials
+      skipTLSVerify: false
+
+    clusterID: homelab
+
+    controller:
+      metrics:
+        enabled: true
+        service:
+          enabled: true
+        serviceMonitor:
+          enabled: false
+
+    grafana:
+      dashboards:
+        enabled: true
+        labels:
+          grafana_dashboard: "1"
+
+    storageClasses:
+      # NFS — RWX, delete on PVC removal
+      - name: tns-csi-nfs
+        enabled: true
+        protocol: nfs
+        isDefault: false
+        pool: hdd
+        parentDataset: k8s
+        server: nas01.nomans.dev
+        reclaimPolicy: Delete
+        deleteStrategy: delete
+        volumeBindingMode: Immediate
+        allowVolumeExpansion: true
+        mountOptions: []
+        parameters:
+          zfs.compression: lz4
+
+      # NFS — RWX, retain dataset on PVC removal (safe for important data)
+      - name: tns-csi-nfs-retain
+        enabled: true
+        protocol: nfs
+        isDefault: false
+        pool: hdd
+        parentDataset: k8s
+        server: nas01.nomans.dev
+        reclaimPolicy: Retain
+        deleteStrategy: retain
+        volumeBindingMode: Immediate
+        allowVolumeExpansion: true
+        mountOptions: []
+        parameters:
+          zfs.compression: lz4
+
+      # iSCSI — RWO, disabled until TrueNAS is in dedicated storage VLAN
+      - name: tns-csi-iscsi
+        enabled: false
+        protocol: iscsi
+        isDefault: false
+        pool: hdd
+        parentDataset: k8s
+        server: nas01.nomans.dev
+        port: "3260"
+        fsType: ext4
+        reclaimPolicy: Delete
+        deleteStrategy: delete
+        volumeBindingMode: Immediate
+        allowVolumeExpansion: true
+        parameters:
+          zfs.sparse: "true"
+          zfs.compression: lz4
