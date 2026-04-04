@@ -49,7 +49,7 @@ spec:
         protocol: nfs
         isDefault: false
         pool: hdd
-        parentDataset: k8s
+        parentDataset: hdd/k8s
         server: nas01.nomans.dev
         reclaimPolicy: Delete
         deleteStrategy: delete
@@ -65,7 +65,7 @@ spec:
         protocol: nfs
         isDefault: false
         pool: hdd
-        parentDataset: k8s
+        parentDataset: hdd/k8s
         server: nas01.nomans.dev
         reclaimPolicy: Retain
         deleteStrategy: retain
@@ -81,7 +81,7 @@ spec:
         protocol: iscsi
         isDefault: false
         pool: hdd
-        parentDataset: k8s
+        parentDataset: hdd/k8s
         server: nas01.nomans.dev
         port: "3260"
         fsType: ext4
