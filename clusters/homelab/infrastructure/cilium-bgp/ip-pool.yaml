@@ -1,6 +1,6 @@
 # Cilium LB-IPAM Pool — ersetzt MetalLB IPAddressPool
 # Bereich: 10.0.50.100-10.0.50.150 (identisch zu vorher)
-apiVersion: cilium.io/v2
+apiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: services-bgp
