@@ -50,6 +50,8 @@ locals {
     node_labels       = coalesce(try(var.talos_base_config.node_labels, null), {})
     node_taints       = coalesce(try(var.talos_base_config.node_taints, null), [])
     kubelet_extra_args = coalesce(try(var.talos_base_config.kubelet.extra_args, null), {})
+    cni_none          = coalesce(try(var.talos_base_config.cni_none, null), false)
+    proxy_disabled    = coalesce(try(var.talos_base_config.proxy_disabled, null), false)
     kube_proxy_mode   = try(var.talos_base_config.kube_proxy.mode, null)
     kube_proxy_ipvs_strict_arp = try(var.talos_base_config.kube_proxy.ipvs_strict_arp, null)
     registry_mirrors  = coalesce(try(var.talos_base_config.registries.mirrors, null), {})

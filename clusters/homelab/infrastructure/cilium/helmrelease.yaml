@@ -1,0 +1,79 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: cilium
+      version: "1.17.3"
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: flux-system
+      interval: 24h
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # Talos: cgroupv2 und bpffs sind bereits gemountet
+    cgroup:
+      autoMount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+
+    # Talos: SYS_MODULE darf nicht geladen werden
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+
+    # kube-proxy Ersatz (KubePrism Port 7445 laut Talos-Doku)
+    kubeProxyReplacement: true
+    k8sServiceHost: localhost
+    k8sServicePort: 7445
+
+    # IPAM: Kubernetes-native (Talos-Empfehlung)
+    ipam:
+      mode: kubernetes
+
+    # BGP Control Plane (ersetzt MetalLB)
+    bgpControlPlane:
+      enabled: true
+
+    # LB-IPAM (ersetzt MetalLB IPAddressPool)
+    loadBalancer:
+      algorithm: maglev
+
+    # Gateway API (ersetzt Traefik)
+    gatewayAPI:
+      enabled: true
+      enableAlpn: true
+      enableAppProtocol: true
+
+    # Hubble Observability (optional aber empfohlen)
+    hubble:
+      relay:
+        enabled: true
+      ui:
+        enabled: false

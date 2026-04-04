@@ -23,38 +23,45 @@ clusters/
     └── infrastructure/
         ├── kustomization.yaml      lists all Flux Kustomization CRDs
         ├── sources.yaml            Kustomization for HelmRepository/GitRepository sources
-        ├── metallb.yaml
-        ├── metallb-config.yaml
+        ├── gateway-api-crds.yaml
+        ├── cilium.yaml
+        ├── cilium-bgp.yaml
         ├── cert-manager.yaml
         ├── external-secrets.yaml
         ├── 1password-connect.yaml
         ├── cluster-secret-store.yaml
         ├── kubelet-serving-cert-approver.yaml
         ├── metrics-server.yaml
+        ├── external-dns.yaml
         ├── sources/                HelmRepository and GitRepository source definitions
-        ├── metallb/
-        ├── metallb-config/
+        ├── gateway-api-crds/       Gateway API CRDs (upstream, pinned to v1.4.1)
+        ├── cilium/                 Cilium CNI + kube-proxy replacement + BGP + Gateway API
+        ├── cilium-bgp/             CiliumBGPClusterConfig, CiliumBGPPeerConfig, LB-IPAM pool
         ├── cert-manager/
         ├── external-secrets/
         ├── 1password-connect/
         ├── cluster-secret-store/
         ├── kubelet-serving-cert-approver/
-        └── metrics-server/
+        ├── metrics-server/
+        └── external-dns/
 ```
 
-Each subdirectory under `infrastructure/` contains a `kustomization.yaml` and the manifests for that component. The files in `infrastructure/` (e.g. `metallb.yaml`) are Flux `Kustomization` CRDs that tell Flux to reconcile each component directory.
+Each subdirectory under `infrastructure/` contains a `kustomization.yaml` and the manifests for that component. The files in `infrastructure/` (e.g. `cilium.yaml`) are Flux `Kustomization` CRDs that tell Flux to reconcile each component directory.
 
 ## Installed Components
 
 | Component | Version | Namespace | Source Type |
 | --- | --- | --- | --- |
-| metallb | 0.15.3 | metallb | HelmRepository |
+| gateway-api-crds | v1.4.1 | cluster-wide | upstream URLs (prune: false) |
+| cilium | 1.17.3 | kube-system | HelmRepository |
+| cilium-bgp | — | cluster-wide | Cilium BGP CRDs |
 | cert-manager | 1.20.1 | cert-manager | HelmRepository (jetstack) |
 | external-secrets | 2.2.0 | external-secrets | HelmRepository |
 | 1password-connect | 2.4.1 | connect | HelmRepository |
 | cluster-secret-store | — | cluster-wide | ClusterSecretStore CRD |
 | kubelet-serving-cert-approver | v0.10.3 | kubelet-serving-cert-approver | GitRepository |
 | metrics-server | 3.13.0 | metrics-server | HelmRepository |
+| external-dns | 1.20.0 | external-dns | HelmRepository |
 
 ## Dependency Graph
 
@@ -62,22 +69,30 @@ Flux `Kustomization` objects use `dependsOn` to enforce ordering. The chain is:
 
 ```
 sources
-├── metallb
-│   └── metallb-config
-├── cert-manager
-├── external-secrets
-│   └── cluster-secret-store
-├── 1password-connect (also depends on external-secrets)
-│   └── cluster-secret-store
-├── kubelet-serving-cert-approver
-└── metrics-server
+│
+gateway-api-crds (no dependsOn, applies CRDs immediately)
+│
+├── cilium (dependsOn: sources, gateway-api-crds)
+│   └── cilium-bgp (dependsOn: cilium, gateway-api-crds)
+│
+├── cert-manager (dependsOn: sources, external-secrets, cluster-secret-store)
+│
+├── external-secrets (dependsOn: sources)
+│   └── cluster-secret-store (dependsOn: external-secrets, 1password-connect)
+│         └── external-dns (dependsOn: sources, external-secrets, cluster-secret-store)
+│
+├── 1password-connect (dependsOn: sources)
+│   └── cluster-secret-store (see above)
+│
+├── kubelet-serving-cert-approver (dependsOn: sources)
+└── metrics-server (dependsOn: sources)
 ```
 
-`sources` must be ready before anything else because all HelmReleases reference sources defined there.
+`gateway-api-crds` must be ready before Cilium starts because Cilium's Gateway API controller requires those CRDs to be present at startup.
 
-`external-secrets` and `1password-connect` must both be ready before `cluster-secret-store`, because the store depends on the ESO CRDs and on the 1Password Connect deployment being available.
+`cilium-bgp` depends on `cilium` (Cilium BGP CRDs are installed by the Cilium HelmRelease) and on `gateway-api-crds` (BGP advertises Gateway LoadBalancer IPs).
 
-`metallb-config` depends on `metallb` because the BGP and pool CRDs do not exist until MetalLB installs them.
+`cert-manager` depends on `external-secrets` and `cluster-secret-store` because it contains an `ExternalSecret` and a `ClusterIssuer` that require ESO CRDs and the 1Password-backed ClusterSecretStore to be available.
 
 ## Secrets That Flux Does Not Manage
 

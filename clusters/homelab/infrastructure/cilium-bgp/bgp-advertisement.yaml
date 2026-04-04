@@ -1,0 +1,14 @@
+# BGP Advertisement — advertise LoadBalancer Service IPs
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPAdvertisement
+metadata:
+  name: services-bgp
+  labels:
+    advertise: bgp-services
+spec:
+  advertisements:
+    - advertisementType: Service
+      service:
+        addresses:
+          - ExternalIP
+          - LoadBalancerIP

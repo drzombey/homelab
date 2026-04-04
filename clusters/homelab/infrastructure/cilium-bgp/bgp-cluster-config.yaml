@@ -1,0 +1,18 @@
+# BGP Cluster-Konfiguration — alle Nodes peeren mit OPNsense
+# myASN: 64513 (Cluster), peerASN: 64512 (OPNsense bei 10.0.40.1)
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPClusterConfig
+metadata:
+  name: homelab
+spec:
+  nodeSelector:
+    matchLabels: {}  # alle Nodes
+  bgpInstances:
+    - name: homelab
+      localASN: 64513
+      peers:
+        - name: opnsense
+          peerASN: 64512
+          peerAddress: 10.0.40.1
+          peerConfigRef:
+            name: opnsense

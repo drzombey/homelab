@@ -1,5 +1,7 @@
 # MetalLB BGP On OPNsense
 
+> **Note:** MetalLB has been replaced by Cilium BGP Control Plane + LB-IPAM. This document is kept for historical reference. The current BGP configuration lives in `clusters/homelab/infrastructure/cilium-bgp/`.
+
 This documents the current homelab MetalLB setup.
 
 ## Network Layout

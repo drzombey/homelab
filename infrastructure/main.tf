@@ -111,10 +111,8 @@ module "kubernetes" {
         rotate-server-certificates = "true"
       }
     }
-    kube_proxy = {
-      mode            = "ipvs"
-      ipvs_strict_arp = true
-    }
+    cni_none       = true
+    proxy_disabled = true
   }
 }
 

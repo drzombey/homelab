@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | `10.0.30.0/24` | Main LAN | Used by regular clients, Wi-Fi, and Proxmox management. Routed by OPNsense on `bridge0`. |
 | `10.0.40.0/24` | VM and Kubernetes node network | Used by isolated VMs and Talos Kubernetes nodes on `VLAN 40`. Routed by OPNsense on `vlan0.40`. |
-| `10.0.50.100-10.0.50.150` | MetalLB service pool | Used only for Kubernetes `LoadBalancer` service IPs announced over BGP. Not assigned to a bridge or interface. |
+| `10.0.50.100-10.0.50.150` | Cilium LB-IPAM service pool | Used only for Kubernetes `LoadBalancer` service IPs announced over BGP via Cilium BGP Control Plane. Not assigned to a bridge or interface. |
 
 ## Proxmox Bridge Layout
 
@@ -78,7 +78,7 @@ For Kubernetes nodes in this repo, the IPs are statically assigned by Talos and 
 
 Useful rules on the `VMNET` interface:
 
-- allow `TCP/179` from Kubernetes nodes to `This Firewall` for MetalLB BGP
+- allow `TCP/179` from Kubernetes nodes to `This Firewall` for Cilium BGP Control Plane
 - allow DNS from `10.0.40.0/24` to `10.0.40.1`
 - allow outbound traffic from `10.0.40.0/24` as needed
 - optionally block access from `10.0.40.0/24` to `10.0.30.0/24` except for explicit exceptions
