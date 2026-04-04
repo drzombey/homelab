@@ -12,3 +12,4 @@ resources:
   - kubelet-serving-cert-approver.yaml
   - metrics-server.yaml
   - external-dns.yaml
+  - networking.yaml

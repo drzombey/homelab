@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: wildcard
+  namespace: networking
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.home.nomans.dev"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wildcard-nomans-dev
+            namespace: networking
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "*.home.nomans.dev"
+      allowedRoutes:
+        namespaces:
+          from: All

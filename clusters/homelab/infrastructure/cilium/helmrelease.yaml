@@ -71,6 +71,13 @@ spec:
       enableAlpn: true
       enableAppProtocol: true
 
+    # Ingress Controller (Kompatibilität für Charts ohne Gateway API Support)
+    # ingressClassName: cilium
+    ingressController:
+      enabled: true
+      default: false
+      loadbalancerMode: shared
+
     # Hubble Observability (optional aber empfohlen)
     hubble:
       relay:
