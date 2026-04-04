@@ -6,7 +6,9 @@ metadata:
   name: homelab
 spec:
   nodeSelector:
-    matchLabels: {}  # alle Nodes
+    matchExpressions:
+      - key: kubernetes.io/hostname
+        operator: Exists
   bgpInstances:
     - name: homelab
       localASN: 64513
