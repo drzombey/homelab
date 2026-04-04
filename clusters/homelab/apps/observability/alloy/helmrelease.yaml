@@ -1,0 +1,159 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: observability
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: alloy
+      version: "1.7.0"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+      interval: 24h
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    alloy:
+      configMap:
+        create: true
+        content: |
+          // ── Metrics: scrape pods with prometheus.io/scrape annotation ─────────────
+          discovery.kubernetes "pods" {
+            role = "pod"
+          }
+
+          discovery.relabel "annotated_pods" {
+            targets = discovery.kubernetes.pods.targets
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+              action        = "keep"
+              regex         = "true"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+              action        = "replace"
+              target_label  = "__metrics_path__"
+              regex         = "(.+)"
+            }
+            rule {
+              source_labels = ["__address__", "__meta_kubernetes_pod_annotation_prometheus_io_port"]
+              action        = "replace"
+              regex         = "([^:]+)(?::\\d+)?;(\\d+)"
+              replacement   = "$1:$2"
+              target_label  = "__address__"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              target_label  = "namespace"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_name"]
+              target_label  = "pod"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_name"]
+              target_label  = "container"
+            }
+          }
+
+          prometheus.scrape "pods" {
+            targets    = discovery.relabel.annotated_pods.output
+            forward_to = [prometheus.remote_write.victoriametrics.receiver]
+          }
+
+          prometheus.remote_write "victoriametrics" {
+            endpoint {
+              url = "http://victoriametrics-victoria-metrics-single-server.observability.svc.cluster.local:8428/api/v1/write"
+            }
+          }
+
+          // ── Logs: collect from all pods via Kubernetes API ─────────────────────────
+          discovery.kubernetes "log_pods" {
+            role = "pod"
+          }
+
+          discovery.relabel "pod_logs" {
+            targets = discovery.kubernetes.log_pods.targets
+
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              target_label  = "namespace"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_name"]
+              target_label  = "pod"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_name"]
+              target_label  = "container"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_node_name"]
+              target_label  = "node"
+            }
+          }
+
+          loki.source.kubernetes "pods" {
+            targets    = discovery.relabel.pod_logs.output
+            forward_to = [loki.write.default.receiver]
+          }
+
+          loki.write "default" {
+            endpoint {
+              url = "http://loki.observability.svc.cluster.local:3100/loki/api/v1/push"
+            }
+          }
+
+          // ── Traces: OTLP receiver ──────────────────────────────────────────────────
+          otelcol.receiver.otlp "default" {
+            grpc {
+              endpoint = "0.0.0.0:4317"
+            }
+            http {
+              endpoint = "0.0.0.0:4318"
+            }
+            output {
+              traces = [otelcol.exporter.otlphttp.tempo.input]
+            }
+          }
+
+          otelcol.exporter.otlphttp "tempo" {
+            client {
+              endpoint = "http://tempo.observability.svc.cluster.local:4318"
+            }
+          }
+
+    controller:
+      type: daemonset
+
+    serviceAccount:
+      create: true
+      name: alloy
+
+    rbac:
+      create: true
+
+    # Expose OTLP ports
+    service:
+      enabled: true
+
+    ports:
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+        protocol: TCP
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+        protocol: TCP

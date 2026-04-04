@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - victoriametrics/helmrelease.yaml
+  - loki/helmrelease.yaml
+  - tempo/helmrelease.yaml
+  - alloy/helmrelease.yaml
+  - grafana/helmrelease.yaml
+  - grafana/externalsecret.yaml
+  - grafana/httproute.yaml
