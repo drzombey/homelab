@@ -50,7 +50,7 @@ spec:
         isDefault: false
         pool: hdd
         parentDataset: hdd/k8s
-        server: 10.0.30.8
+        server: nas01.nomans.dev
         reclaimPolicy: Delete
         deleteStrategy: delete
         volumeBindingMode: Immediate
@@ -66,7 +66,7 @@ spec:
         isDefault: false
         pool: hdd
         parentDataset: hdd/k8s
-        server: 10.0.30.8
+        server: nas01.nomans.dev
         reclaimPolicy: Retain
         deleteStrategy: retain
         volumeBindingMode: Immediate
@@ -82,7 +82,7 @@ spec:
         isDefault: false
         pool: hdd
         parentDataset: hdd/k8s
-        server: 10.0.30.8
+        server: nas01.nomans.dev
         port: "3260"
         fsType: ext4
         reclaimPolicy: Delete

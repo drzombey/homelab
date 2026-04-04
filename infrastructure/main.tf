@@ -11,7 +11,8 @@ locals {
         network_interface = "vmbrLAN"
         vlan_id           = 40
         dns_server = [
-          "10.0.40.1"
+          "10.0.40.1",
+          "10.0.40.2",
         ]
         ipv4 = {
           address = "10.0.40.10/24"
@@ -30,7 +31,8 @@ locals {
         network_interface = "vmbrLAN"
         vlan_id           = 40
         dns_server = [
-          "10.0.40.1"
+          "10.0.40.1",
+          "10.0.40.2",
         ]
         ipv4 = {
           address = "10.0.40.11/24"
@@ -49,7 +51,8 @@ locals {
         network_interface = "vmbrLAN"
         vlan_id           = 40
         dns_server = [
-          "10.0.40.1"
+          "10.0.40.1",
+          "10.0.40.2",
         ]
         ipv4 = {
           address = "10.0.40.12/24"
@@ -68,7 +71,8 @@ locals {
         network_interface = "vmbrLAN"
         vlan_id           = 40
         dns_server = [
-          "10.0.40.1"
+          "10.0.40.1",
+          "10.0.40.2",
         ]
         ipv4 = {
           address = "10.0.40.13/24"
@@ -87,7 +91,8 @@ locals {
         network_interface = "vmbrLAN"
         vlan_id           = 40
         dns_server = [
-          "10.0.40.1"
+          "10.0.40.1",
+          "10.0.40.2",
         ]
         ipv4 = {
           address = "10.0.40.14/24"
