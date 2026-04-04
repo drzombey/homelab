@@ -7,7 +7,6 @@ This repository contains the infrastructure and cluster configuration for my hom
 | Path | Purpose |
 | --- | --- |
 | `infrastructure/` | OpenTofu code to provision Talos-based Kubernetes nodes on Proxmox |
-| `cluster-infrastructure/` | Post-bootstrap cluster configuration such as MetalLB BGP resources |
 | `clusters/` | Flux GitOps configuration for the Kubernetes cluster |
 
 ## Documentation

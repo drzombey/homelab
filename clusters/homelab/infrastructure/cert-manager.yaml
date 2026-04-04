@@ -12,5 +12,7 @@ spec:
     name: flux-system
   dependsOn:
     - name: sources
+    - name: external-secrets
+    - name: cluster-secret-store
   wait: true
   timeout: 10m

@@ -13,8 +13,10 @@ The Kubernetes nodes already run in the VM network, so BGP peering happens on `1
 
 ## Files
 
-- `cluster-infrastructure/hack/helm/metallb/values.yaml` enables FRR mode in the MetalLB speaker
-- `cluster-infrastructure/hack/helm/metallb/bgp.yaml` defines the BGP peer, service pool, and advertisement
+- `clusters/homelab/infrastructure/metallb/helmrelease.yaml` — HelmRelease with FRR mode enabled in the MetalLB speaker
+- `clusters/homelab/infrastructure/metallb-config/bgp-peer.yaml` — BGP peer definition
+- `clusters/homelab/infrastructure/metallb-config/ip-address-pool.yaml` — service IP pool
+- `clusters/homelab/infrastructure/metallb-config/bgp-advertisement.yaml` — BGP advertisement
 
 ## Configuration Summary
 
@@ -39,21 +41,13 @@ Expected result:
 
 ## Kubernetes Setup
 
-1. Install MetalLB with Helm.
-2. Use the values from `cluster-infrastructure/hack/helm/metallb/values.yaml`.
-3. Apply `cluster-infrastructure/hack/helm/metallb/bgp.yaml`.
+MetalLB and its BGP configuration are fully managed by Flux. After bootstrapping, Flux applies the HelmRelease and the BGP resources automatically in the correct order (`metallb-config` depends on `metallb`).
 
-Example:
+To manually trigger a reconciliation:
 
 ```bash
-helm repo add metallb https://metallb.github.io/metallb
-helm repo update
-helm upgrade --install metallb metallb/metallb \
-  --namespace metallb \
-  --create-namespace \
-  -f cluster-infrastructure/hack/helm/metallb/values.yaml
-
-kubectl apply -f cluster-infrastructure/hack/helm/metallb/bgp.yaml
+flux reconcile kustomization metallb -n flux-system
+flux reconcile kustomization metallb-config -n flux-system
 ```
 
 ## Pod Security Requirement
