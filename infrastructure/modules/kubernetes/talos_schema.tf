@@ -6,7 +6,6 @@ data "talos_image_factory_extensions_versions" "this" {
       "intel-ucode",      # see https://github.com/siderolabs/talos/issues/9776
       "iscsi-tools",      # for block storage (tns-csi)
       "mei",              # see https://github.com/siderolabs/talos/issues/9776
-      "nfs-common",       # for NFS storage (tns-csi)
       "qemu-guest-agent", # for proxmox
     ]
   }
