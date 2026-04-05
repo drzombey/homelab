@@ -14,3 +14,4 @@ resources:
   - grafana/dashboards/loki.yaml
   - grafana/dashboards/tns-csi.yaml
   - kube-state-metrics/helmrelease.yaml
+  - node-exporter/helmrelease.yaml

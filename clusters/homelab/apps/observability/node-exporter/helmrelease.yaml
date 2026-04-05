@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: node-exporter
+  namespace: observability
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: prometheus-node-exporter
+      version: "4.53.0"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 24h
+  install:
+    createNamespace: false
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    # Run on all nodes including control-plane
+    tolerations:
+      - effect: NoSchedule
+        operator: Exists
+
+    # Use host network/PID for accurate metrics
+    hostNetwork: true
+    hostPID: true
+
+    # Disable prometheus-operator ServiceMonitor — Alloy scrapes via pod annotation
+    prometheus:
+      monitor:
+        enabled: false
+
+    # Add scrape annotation so Alloy picks it up
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9100"
+
+    service:
+      port: 9100
+      targetPort: 9100
