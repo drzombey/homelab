@@ -44,6 +44,11 @@ spec:
             name: external-dns-rfc2136-tsig
             key: tsig-secret
 
+    sources:
+      - service
+      - ingress
+      - gateway-httproute
+
     domainFilters:
       - home.nomans.dev
 
