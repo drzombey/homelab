@@ -112,6 +112,40 @@ spec:
             forward_to = [prometheus.remote_write.victoriametrics.receiver]
           }
 
+          // ── Metrics: tns-csi controller ───────────────────────────────────────────
+          discovery.kubernetes "tns_csi" {
+            role = "endpoints"
+            namespaces {
+              names = ["kube-system"]
+            }
+            selectors {
+              role  = "endpoints"
+              label = "app=tns-csi-controller"
+            }
+          }
+
+          discovery.relabel "tns_csi" {
+            targets = discovery.kubernetes.tns_csi.targets
+            rule {
+              source_labels = ["__meta_kubernetes_endpoint_port_name"]
+              action        = "keep"
+              regex         = "metrics"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              target_label  = "namespace"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_name"]
+              target_label  = "pod"
+            }
+          }
+
+          prometheus.scrape "tns_csi" {
+            targets    = discovery.relabel.tns_csi.output
+            forward_to = [prometheus.remote_write.victoriametrics.receiver]
+          }
+
           // ── Metrics: scrape pods with prometheus.io/scrape annotation ─────────────
           discovery.kubernetes "pods" {
             role = "pod"
