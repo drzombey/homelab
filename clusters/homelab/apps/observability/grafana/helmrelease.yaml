@@ -38,17 +38,20 @@ spec:
         apiVersion: 1
         datasources:
           - name: VictoriaMetrics
+            uid: VictoriaMetrics
             type: prometheus
             url: http://victoriametrics-victoria-metrics-single-server.observability.svc.cluster.local:8428
             access: proxy
             isDefault: true
 
           - name: Loki
+            uid: Loki
             type: loki
             url: http://loki.observability.svc.cluster.local:3100
             access: proxy
 
           - name: Tempo
+            uid: Tempo
             type: tempo
             url: http://tempo.observability.svc.cluster.local:3200
             access: proxy
