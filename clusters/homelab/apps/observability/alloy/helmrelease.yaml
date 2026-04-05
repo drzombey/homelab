@@ -120,7 +120,7 @@ spec:
             }
             selectors {
               role  = "endpoints"
-              label = "app=tns-csi-controller"
+              label = "app.kubernetes.io/name=tns-csi-driver,app.kubernetes.io/component=controller"
             }
           }
 
