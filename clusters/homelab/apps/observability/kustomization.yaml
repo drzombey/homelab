@@ -9,3 +9,7 @@ resources:
   - grafana/helmrelease.yaml
   - grafana/externalsecret.yaml
   - grafana/httproute.yaml
+  - grafana/dashboards/node-exporter.yaml
+  - grafana/dashboards/kubernetes-cluster.yaml
+  - grafana/dashboards/loki.yaml
+  - kube-state-metrics/helmrelease.yaml

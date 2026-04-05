@@ -27,6 +27,91 @@ spec:
       configMap:
         create: true
         content: |
+          // ── Remote write ──────────────────────────────────────────────────────────
+          prometheus.remote_write "victoriametrics" {
+            endpoint {
+              url = "http://victoriametrics-victoria-metrics-single-server.observability.svc.cluster.local:8428/api/v1/write"
+            }
+          }
+
+          // ── Metrics: Kubelet (node summary + cadvisor) ────────────────────────────
+          discovery.kubernetes "nodes" {
+            role = "node"
+          }
+
+          discovery.relabel "kubelet" {
+            targets = discovery.kubernetes.nodes.targets
+            rule {
+              target_label = "__address__"
+              replacement  = "kubernetes.default.svc.cluster.local:443"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_node_name"]
+              target_label  = "__metrics_path__"
+              replacement   = "/api/v1/nodes/$1/proxy/metrics"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_node_name"]
+              target_label  = "node"
+            }
+          }
+
+          prometheus.scrape "kubelet" {
+            targets    = discovery.relabel.kubelet.output
+            scheme     = "https"
+            tls_config {
+              ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+              insecure_skip_verify = true
+            }
+            bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+            forward_to        = [prometheus.remote_write.victoriametrics.receiver]
+          }
+
+          discovery.relabel "cadvisor" {
+            targets = discovery.kubernetes.nodes.targets
+            rule {
+              target_label = "__address__"
+              replacement  = "kubernetes.default.svc.cluster.local:443"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_node_name"]
+              target_label  = "__metrics_path__"
+              replacement   = "/api/v1/nodes/$1/proxy/metrics/cadvisor"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_node_name"]
+              target_label  = "node"
+            }
+          }
+
+          prometheus.scrape "cadvisor" {
+            targets    = discovery.relabel.cadvisor.output
+            scheme     = "https"
+            tls_config {
+              ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+              insecure_skip_verify = true
+            }
+            bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+            forward_to        = [prometheus.remote_write.victoriametrics.receiver]
+          }
+
+          // ── Metrics: kube-state-metrics ───────────────────────────────────────────
+          discovery.kubernetes "kube_state_metrics" {
+            role = "endpoints"
+            namespaces {
+              names = ["observability"]
+            }
+            selectors {
+              role  = "endpoints"
+              label = "app.kubernetes.io/name=kube-state-metrics"
+            }
+          }
+
+          prometheus.scrape "kube_state_metrics" {
+            targets    = discovery.kubernetes.kube_state_metrics.targets
+            forward_to = [prometheus.remote_write.victoriametrics.receiver]
+          }
+
           // ── Metrics: scrape pods with prometheus.io/scrape annotation ─────────────
           discovery.kubernetes "pods" {
             role = "pod"
@@ -70,12 +155,6 @@ spec:
           prometheus.scrape "pods" {
             targets    = discovery.relabel.annotated_pods.output
             forward_to = [prometheus.remote_write.victoriametrics.receiver]
-          }
-
-          prometheus.remote_write "victoriametrics" {
-            endpoint {
-              url = "http://victoriametrics-victoria-metrics-single-server.observability.svc.cluster.local:8428/api/v1/write"
-            }
           }
 
           // ── Logs: collect from all pods via Kubernetes API ─────────────────────────

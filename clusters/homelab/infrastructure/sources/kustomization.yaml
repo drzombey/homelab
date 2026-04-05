@@ -11,3 +11,4 @@ resources:
   - tns-csi.yaml
   - grafana.yaml
   - victoriametrics.yaml
+  - prometheus-community.yaml
