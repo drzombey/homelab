@@ -38,9 +38,7 @@ spec:
 
     grafana:
       dashboards:
-        enabled: true
-        labels:
-          grafana_dashboard: "1"
+        enabled: false
 
     storageClasses:
       # NFS — RWX, delete on PVC removal
