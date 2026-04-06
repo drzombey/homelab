@@ -12,3 +12,4 @@ resources:
   - grafana.yaml
   - victoriametrics.yaml
   - prometheus-community.yaml
+  - authentik.yaml
